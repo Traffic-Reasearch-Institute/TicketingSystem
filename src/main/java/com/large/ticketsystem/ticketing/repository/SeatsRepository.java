@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface SeatsRepository extends JpaRepository<Seats, Long> {
 
-    List<Seats> findByShowId(Long showId);
+    List<Seats> findAllByShowId(Long showId);
+
+    List<Seats> findAllByShowIdAndSeatIdIn(Long showId, List<Long> seats);
 }

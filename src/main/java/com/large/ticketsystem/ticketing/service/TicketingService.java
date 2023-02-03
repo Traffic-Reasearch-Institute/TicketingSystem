@@ -5,6 +5,7 @@ import com.large.ticketsystem.ticketing.model.dto.SeatsResponseDto;
 import com.large.ticketsystem.ticketing.repository.SeatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ public class TicketingService {
     }
 
     //좌석 정보 가져오기
+    @Transactional(readOnly = true)
     public List<SeatsResponseDto> getSeats(Long showId) {
 
         //해당 공연의 좌석 리스트 가져오기
@@ -41,9 +43,9 @@ public class TicketingService {
         return seats.stream().map(seat -> SeatsResponseDto.builder()
                         .seatId(seat.getSeatId())
                         .seatNum(seat.getSeatNum())
-                        .status(seat.isStatus())
                         .build())
                 .sorted(Comparator.comparing(SeatsResponseDto::getSeatId))
                 .collect(Collectors.toList());
     }
+
 }

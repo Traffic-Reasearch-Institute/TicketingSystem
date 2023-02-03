@@ -1,6 +1,5 @@
 package com.large.ticketsystem.ticketing.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,12 +15,10 @@ public class Seats {
     private Long seatId;
     private Long showId; //todo show - 연관관계로 바꿔주기
     private String seatNum;
-    private boolean status;
 
     public Seats(Long showId, String seatNum) {
         this.showId = showId;
         this.seatNum = seatNum;
-        status = true;
     }
 
 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 public class ReservedSeats {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long seatId;
     private Long reservationId; //todo 연관관계

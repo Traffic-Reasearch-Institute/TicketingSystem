@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SeatsRepository extends JpaRepository<Seats, Long> {
+public interface SeatsRepository extends JpaRepository<Seats, Long>, CustomSeatsRepository {
 
     List<Seats> findAllByShowId(Long showId);
 

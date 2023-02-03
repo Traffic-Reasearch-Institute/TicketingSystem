@@ -22,6 +22,7 @@ public class TicketingController {
         return ticketingService.getSeats(showId);
     }
 
+
     @PostMapping("/seats/{showId}")
     public ResponseEntity<String> reservationSeats(@RequestBody List<Long> seats, @PathVariable Long showId) { //todo 좌석 번호들을 어떻게 넘길건지 다시 정하기
         ticketingService.reservationSeats(seats, showId);

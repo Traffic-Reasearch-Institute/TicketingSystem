@@ -1,5 +1,7 @@
 package com.large.ticketsystem.ticketing.service;
 
+import com.large.ticketsystem.reservation.model.Reservation;
+import com.large.ticketsystem.reservation.repository.ReservationRepository;
 import com.large.ticketsystem.ticketing.model.ReservedSeats;
 import com.large.ticketsystem.ticketing.model.Seats;
 import com.large.ticketsystem.ticketing.model.dto.SeatsResponseDto;
@@ -19,9 +21,10 @@ import java.util.stream.Collectors;
 public class TicketingService {
 
     private final SeatsRepository seatsRepository;
-    private final ReservedSeatsRepository reservationRepository;
+    private final ReservedSeatsRepository seatReservationRepository;
+    private final ReservationRepository reservationRepository;
 
-    @PostConstruct
+    @PostConstruct //todo 없애기
     public void init() {
 
         for (int i = 0; i < 30; i++) {
@@ -33,6 +36,8 @@ public class TicketingService {
             Seats seat = new Seats(2L, "B" + i);
             seatsRepository.save(seat);
         }
+
+
     }
 
     //좌석 정보 가져오기
@@ -54,9 +59,11 @@ public class TicketingService {
     // 좌석 예매하기
     @Transactional
     public void reservationSeats(List<Long> seats, Long showId) {
+        //todo memberId 가져오기
+        Long memberId = 5L;
 
         //선택한 좌석 중 예약된 좌석이 있는지 확인
-        List<ReservedSeats> reservedSeats = reservationRepository.findAllBySeatIdInAndStatus(seats, true);
+        List<ReservedSeats> reservedSeats = seatReservationRepository.findAllBySeatIdInAndStatus(seats, true);
         if (reservedSeats.size() > 0) {
             throw new IllegalArgumentException("이미 예약된 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
@@ -67,11 +74,18 @@ public class TicketingService {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
+        //예약내역 먼저 저장 //todo 수정할 것
+        Reservation reservation = new Reservation(showId, memberId);
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+
         //선택한 좌석들을 예약좌석에 저장
         for (Long seat : seats) {
-            ReservedSeats reservedSeat = new ReservedSeats(seat, showId);
-            reservationRepository.save(reservedSeat);
+            ReservedSeats reservedSeat = new ReservedSeats(seat, savedReservation.getId());
+            seatReservationRepository.save(reservedSeat);
         }
+
+        //todo showId, memberId 가지고 예약 엔티티에 저장
     }
 
 }

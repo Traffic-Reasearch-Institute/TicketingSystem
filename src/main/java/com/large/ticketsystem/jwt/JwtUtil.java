@@ -1,6 +1,6 @@
 package com.large.ticketsystem.jwt;
 
-import com.large.ticketsystem.member.entity.MemberRoleEnum;
+import com.large.ticketsystem.members.entity.MembersRoleEnum;
 import com.large.ticketsystem.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -64,7 +64,7 @@ public class JwtUtil {
     }
 
     // 토큰 생성, string으로 반환
-    public String createToken(String username, MemberRoleEnum role) {
+    public String createToken(String username, MembersRoleEnum role) {
         Date date = new Date();
 
         return BEARER_PREFIX +

@@ -1,4 +1,4 @@
-package com.large.ticketsystem.member.entity;
+package com.large.ticketsystem.members.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Member {
+public class Members {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,5 +21,11 @@ public class Member {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private MemberRoleEnum role;
+    private MembersRoleEnum role;
+
+    public Members(String username, String password, MembersRoleEnum role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 }

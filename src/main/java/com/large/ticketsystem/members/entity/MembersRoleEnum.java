@@ -1,6 +1,6 @@
-package com.large.ticketsystem.member.entity;
+package com.large.ticketsystem.members.entity;
 
-public enum MemberRoleEnum {
+public enum MembersRoleEnum {
     //enum 상수 정의
     //member, admin은 Authority의 member, admin 값을 가짐
     MEMBER(Authority.MEMBER),
@@ -12,7 +12,7 @@ public enum MemberRoleEnum {
 
     //생성자
     //객체 생성할 때 무조건 authority를 줘야함
-    MemberRoleEnum(String authority) {
+    MembersRoleEnum(String authority) {
         this.authority = authority;
     }
 

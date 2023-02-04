@@ -4,11 +4,15 @@ import com.large.ticketsystem.jwt.JwtAuthFilter;
 import com.large.ticketsystem.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,14 +42,27 @@ public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
 
+
+    //h2 console 사용을 위해 h2관련해서 보안 검사를 건너뛰도록 함
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers(PathRequest.toH2Console())
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         //CSRF(Cross-Site Request Forgery) 보호를 비활성화
         http.csrf().disable();
+
+        // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
         //다양한 엔드포인트 패턴에 대한 요청을 승인
         http.authorizeRequests()
                 //추후 api들에 맞춰 permit 여부 결정
-                .antMatchers("/*").permitAll()
+                .antMatchers("/**").permitAll()
 
         //다른 것들은 전부 인증을 받아야 한다.
 //                .anyRequest().authenticated()
@@ -53,7 +70,7 @@ public class WebSecurityConfig {
         // addFilterBefore -> 1번째 인자값의 필터가 2번째 인자값의 필터를 수행하기 전에 실행됨.
         // 즉, Jwt필터를 이용해 일단 토큰이 제대로 되어 있는 지부터 확인한다.
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
+        http.formLogin().loginPage("/api/members/login").permitAll();
 
         //http 보안 설정을 위 내용으로 해서 반환
         return http.build();

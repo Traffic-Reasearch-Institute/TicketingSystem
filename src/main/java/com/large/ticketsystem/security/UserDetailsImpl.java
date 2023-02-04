@@ -1,7 +1,7 @@
 package com.large.ticketsystem.security;
 
-import com.large.ticketsystem.member.entity.Member;
-import com.large.ticketsystem.member.entity.MemberRoleEnum;
+import com.large.ticketsystem.members.entity.Members;
+import com.large.ticketsystem.members.entity.MembersRoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,18 +12,18 @@ import java.util.Collection;
 //spring security에서 사용자 계정 정보를 저장하는데 쓰임.
 public class UserDetailsImpl implements UserDetails {
 
-    private final Member member;
+    private final Members members;
 
     private final String username;
 
     //생성자
-    public UserDetailsImpl(Member member, String username) {
-        this.member = member;
+    public UserDetailsImpl(Members members, String username) {
+        this.members = members;
         this.username = username;
     }
 
-    public Member getMember() {
-        return member;
+    public Members getMember() {
+        return members;
     }
 
     /*
@@ -32,7 +32,7 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         //현재 member 객체에서 권한을 가져와 role에 할당
-        MemberRoleEnum role = member.getRole();
+        MembersRoleEnum role = members.getRole();
         //권한을 나타내는 문자열을 authority에 넣어줌
         String authority = role.getAuthority();
 

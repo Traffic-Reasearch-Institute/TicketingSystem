@@ -1,6 +1,6 @@
 package com.large.ticketsystem.members.controller;
 
-import com.large.ticketsystem.members.dto.MembersSignupRequestDto;
+import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
 import com.large.ticketsystem.members.service.MembersService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class MembersController {
     private final MembersService membersService;
+
     @PostMapping("/signup")
-    public MembersResponseMsgDto signup(@RequestBody MembersSignupRequestDto membersSignupRequestDto, HttpServletResponse response) {
-        return membersService.signup(membersSignupRequestDto, response);
+    public MembersResponseMsgDto signup(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response) {
+        return membersService.signup(membersRequestDto, response);
+    }
+
+    @PostMapping("/login")
+    public MembersResponseMsgDto login(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response){
+        return membersService.login(membersRequestDto, response);
     }
 }

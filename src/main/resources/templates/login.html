@@ -25,24 +25,32 @@
 
         $.ajax({
             type: "POST",
-            url: "/login/api",
-            data: {
-                login_id_give: login_id_value,
-                login_pw_give: login_pw_value
-            },
-            success: function (response) {
-                if (response['result'] == 'success') {
-                    // 로그인이 정상적으로 되면, 토큰을 받아옵니다.
-                    // 이 토큰을 userToken이라는 키 값으로 쿠키에 저장합니다.
-                    $.cookie('userToken', response['token']);
+            url: '/api/members/login',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                username: login_id_value,
+                password: login_pw_value,
+            }),
+            //reponse -> 서버에서 내려오는 response
+            //status -> reponse의 http status code. 이게 200이어야 xhr.getResopnseHeader 사용. 인자값에서 빼면 에러남
+            //xhr -> 서버와 통신할 때 사용하는 객체 클라이언트에서 서버로 http request / response 보내고 수신할 떄 사용됨.
+            success: function (response, status, xhr) {
+                console.log(response)
+                if (response['httpStatus'] === 200) {
+                        // 로그인이 정상적으로 되면, 토큰을 받아옵니다.
+                        // 이 토큰을 userToken이라는 키 값으로 쿠키에 저장합니다.
+                        //response header에서 토큰을 가져와서 쿠키에 Authorization 키 / 밸류로 저장
+                        //';path=/'는 쿠키에 저장될 경로를 말함. 여기에선'/'로 되어있어서 쿠키가 우리 웹사이트 전체에서 사용될 수 있음
+                        //xhr은 XMLHttpRequest 객체를 말함. 비동기적으로 데이터를 주고받는 ajax에서 사용되는 것으로 여기에선 response header의 값을 가져오기 위해 사용됨.
+                        document.cookie = 'Authorization' + '=' + xhr.getResponseHeader('Authorization') + ';path=/';
 
-                    alert('로그인 완료!')
-                    window.location.href = '/main'
-                } else {
-                    // 로그인이 안되면 에러메시지를 띄웁니다.
-                    alert(response['msg'])
+                        window.location.href ='/main'
                 }
-            }
+            },
+            error: function (response) {
+                console.log(response['responseJSON'])
+                alert(response['reponseJSON']['msg'])
+            },
         })
     }
 
@@ -198,11 +206,6 @@
 
 
 <body>
-<!-- <div class="navBar">
-    <a href="/main">gameReview</a>
-    <span>&nbsp; | &nbsp;</span>
-    <a href="/board">freeBoard</a>
-</div> -->
 
 <div class="loginField_wrap">
     <div class="loginField">
@@ -239,6 +242,7 @@
             </div>
         </div>
     </div>
+</div>
 
 
 </body>

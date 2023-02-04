@@ -3,7 +3,7 @@ package com.large.ticketsystem.members.dto;
 import lombok.Getter;
 
 @Getter
-public class MembersSignupRequestDto {
+public class MembersRequestDto {
     private String username;
     private String password;
 }

@@ -2,14 +2,12 @@ package com.large.ticketsystem.members.service;
 
 import com.large.ticketsystem.jwt.JwtUtil;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
-import com.large.ticketsystem.members.dto.MembersSignupRequestDto;
+import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.entity.Members;
 import com.large.ticketsystem.members.entity.MembersRoleEnum;
 import com.large.ticketsystem.members.repository.MembersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.Transient;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,10 +38,10 @@ public class MembersService {
         return new MembersResponseMsgDto(message, status.value());
     }
     @Transactional
-    public MembersResponseMsgDto signup(MembersSignupRequestDto membersSignupRequestDto, HttpServletResponse response) {
-        String username = membersSignupRequestDto.getUsername();
+    public MembersResponseMsgDto signup(MembersRequestDto membersRequestDto, HttpServletResponse response) {
+        String username = membersRequestDto.getUsername();
 //        String password = membersSignupRequestDto.getPassword();
-        String password = passwordEncoder.encode(membersSignupRequestDto.getPassword());
+        String password = passwordEncoder.encode(membersRequestDto.getPassword());
 
         //회원 중복 확인
         Optional<Members> found = membersRepository.findByUsername(username);
@@ -52,12 +50,12 @@ public class MembersService {
         }
 
         //아이디 양식 확인
-        if (!membersSignupRequestDto.getUsername().matches("^[a-zA-Z0-9]{5,10}$")) {
+        if (!membersRequestDto.getUsername().matches("^[a-zA-Z0-9]{5,10}$")) {
             return handleMemberException("아이디 양식을 지켜주세요!", HttpStatus.BAD_REQUEST, response);
         }
 
         //비밀번호 양식
-        if (!membersSignupRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,12}$")) {
+        if (!membersRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,12}$")) {
             return handleMemberException("비밀번호는 영어 대소문자, 숫자의 최소 8자에서 최대 12자리여야 합니다.", HttpStatus.BAD_REQUEST, response);
         }
 
@@ -67,5 +65,23 @@ public class MembersService {
         membersRepository.save(members);
 
         return handleMemberException("회원가입 성공", HttpStatus.OK, response);
+    }
+
+    public MembersResponseMsgDto login(MembersRequestDto membersRequestDto, HttpServletResponse response) {
+        String username = membersRequestDto.getUsername();
+        String password = membersRequestDto.getPassword();
+
+        //등록된 사용자인지 확인
+        Members existMember = membersRepository.findByUsername(username).orElseThrow(
+                () -> new IllegalArgumentException("등록되지 않은 회원입니다."));
+
+        //비밀번호 확인
+        if (!passwordEncoder.matches(password, existMember.getPassword())) {
+            return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
+        }
+
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
+
+        return handleMemberException("로그인 성공", HttpStatus.OK, response);
     }
 }

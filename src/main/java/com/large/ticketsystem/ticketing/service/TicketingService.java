@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -62,35 +60,43 @@ public class TicketingService {
 
     // 좌석 예매하기
     @Transactional
-    public void reservationSeats(List<Long> seats, Long showId) {
+    public void reservationSeats(String seats, Long showId) {
         //todo memberId 가져오기
         Long memberId = 5L;
 
+        //좌석번호가 "seats" : "5 6 7" -> 이런 식으로 들어오기 때문에 쪼개서 5,6,7을 List<Long> 안에 담아주도록 한다
+        String[] split = seats.split(":\"")[1].split(" ");
+        ArrayList<Long> seatList = new ArrayList<>();
+
+        for (int i = 0; i < split.length - 1; i++) {
+            System.out.println("i = " + split[i]);
+            seatList.add(Long.valueOf(split[i]));
+        }
+
         //선택한 좌석 중 예약된 좌석이 있는지 확인
-        List<ReservedSeats> reservedSeats = seatReservationRepository.findAllBySeatIdInAndStatus(seats, true);
+        List<ReservedSeats> reservedSeats = seatReservationRepository.findAllBySeatIdInAndStatus(seatList, true);
         if (reservedSeats.size() > 0) {
             throw new IllegalArgumentException("이미 예약된 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
-        //선택한 좌석번호가 잘못되었다면(존재하지 않는다면)
-        List<Seats> findSeats = seatsRepository.findAllByShowIdAndSeatIdIn(showId, seats);
-        if (findSeats.size() != seats.size()) {
+        //선택한 좌석번호가 존재하지 않는 경우
+        List<Seats> findSeats = seatsRepository.findAllByShowIdAndSeatIdIn(showId, seatList);
+        if (findSeats.size() != seatList.size()) {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
-        //예약 테이블에 먼저 저장 //todo 수정할 것
+        //예약내역을 예약 테이블에 먼저 저장 //todo 수정할 것
         Reservation reservation = new Reservation(showId, memberId);
         Reservation savedReservation = reservationRepository.save(reservation);
 
 
-        //선택한 좌석들을 예약좌석에 저장
-        for (Long seat : seats) {
+        //선택한 좌석들을 예약좌석 테이블에 저장
+        for (Long seat : seatList) {
             ReservedSeats reservedSeat = new ReservedSeats(seat, savedReservation.getId());
             seatReservationRepository.save(reservedSeat);
         }
 
-        // 좌석정보에 status -> true(예약됨) 으로 바꿔주기
-        seatsRepository.updateStatus(seats);
+        // 좌석 테이블에 status -> true(예약됨) 으로 바꿔주기
+        seatsRepository.updateStatus(seatList);
     }
-
 }

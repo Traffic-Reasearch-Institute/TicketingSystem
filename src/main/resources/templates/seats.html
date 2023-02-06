@@ -68,13 +68,6 @@
     }
 
   </style>
-
-  <script>
-    $(document).ready(function () {
-
-    });
-  </script>
-
   <title></title>
 </head>
 <body>
@@ -90,32 +83,34 @@
   <div class="container" id="container">
     <h2>Seat Reservation</h2>
     <p>예약가능 좌석 : 하늘색</p>
-<!--    <div class="row">-->
-<!--      <button class="seat sold" id="seat1" value="1">1</button>-->
-<!--      <button class="seat sold" id="seat2" value="2">2</button>-->
-<!--      <button class="seat selling" id="seat3" value="3">3</button>-->
-<!--      <button class="seat selling" id="seat4" value="4">4</button>-->
-<!--      <button class="seat selling" id="seat5" value="5">5</button>-->
-<!--      <button class="seat selling" id="seat6" value="6">6</button>-->
-<!--      <button class="seat sold" id="seat7" value="7">7</button>-->
-<!--      <button class="seat selling" id="seat8" value="8">8</button>-->
-<!--      <button class="seat sold" id="seat9" value="9">9</button>-->
-<!--      <button class="seat selling" id="seat10" value="10">10</button>-->
-<!--      &lt;!&ndash; Add more seats here &ndash;&gt;-->
-<!--    </div>-->
+    <!--    <div class="row">-->
+    <!--      <button class="seat sold" id="seat1" value="1">1</button>-->
+    <!--      <button class="seat sold" id="seat2" value="2">2</button>-->
+    <!--      <button class="seat selling" id="seat3" value="3">3</button>-->
+    <!--      <button class="seat selling" id="seat4" value="4">4</button>-->
+    <!--      <button class="seat selling" id="seat5" value="5">5</button>-->
+    <!--      <button class="seat selling" id="seat6" value="6">6</button>-->
+    <!--      <button class="seat sold" id="seat7" value="7">7</button>-->
+    <!--      <button class="seat selling" id="seat8" value="8">8</button>-->
+    <!--      <button class="seat sold" id="seat9" value="9">9</button>-->
+    <!--      <button class="seat selling" id="seat10" value="10">10</button>-->
+    <!--      &lt;!&ndash; Add more seats here &ndash;&gt;-->
+    <!--    </div>-->
 
-<!--    <div class="row">-->
-<!--      <button class="seat sold" id="seat11" value="11">11</button>-->
-<!--      <button class="seat selling" id="seat12" value="12">12</button>-->
-<!--      <button class="seat selling" id="seat13" value="13">13</button>-->
-<!--      <button class="seat selling" id="seat14" value="14">14</button>-->
-<!--      <button class="seat sold" id="seat20" value="15">15</button>-->
-<!--      <button class="seat sold" id="seat15" value="16">16</button>-->
-<!--      <button class="seat sold" id="seat16" value="17">17</button>-->
-<!--      <button class="seat selling" id="seat17" value="18">18</button>-->
-<!--      <button class="seat selling" id="seat18" value="19">19</button>-->
-<!--      <button class="seat selling" id="seat19" value="20">20</button>-->
-<!--    </div>-->
+    <!--    <div class="row">-->
+    <!--      <button class="seat sold" id="seat11" value="11">11</button>-->
+    <!--      <button class="seat selling" id="seat12" value="12">12</button>-->
+    <!--      <button class="seat selling" id="seat13" value="13">13</button>-->
+    <!--      <button class="seat selling" id="seat14" value="14">14</button>-->
+    <!--      <button class="seat sold" id="seat20" value="15">15</button>-->
+    <!--      <button class="seat sold" id="seat15" value="16">16</button>-->
+    <!--      <button class="seat sold" id="seat16" value="17">17</button>-->
+    <!--      <button class="seat selling" id="seat17" value="18">18</button>-->
+    <!--      <button class="seat selling" id="seat18" value="19">19</button>-->
+    <!--      <button class="seat selling" id="seat19" value="20">20</button>-->
+    <!--    </div>-->
+
+    <input type="hidden" th:value="${showId}" id="showId">
 
     <div class="row">
       <th:block th:each="seat : ${seats}">
@@ -162,6 +157,7 @@
     });
   });
 
+  // 좌석 다시 선택하기
   $('#reset').on('click', function(){
     seats.forEach(seat => {
       seat.classList.remove('reversed');
@@ -169,26 +165,52 @@
     });
   });
 
+  //예약하기 클릭시
   $('#reserve').on('click', function(){
     if (total_count < document.querySelector('#seats').value) {
       alert('좌석을 선택하세요');
       return
     }
-    let arr = [];
+
+    let seatArr = [];
     let count = 0;
     seats.forEach(seat => {
       if (seat.classList.contains('reserved')) {
-        arr[count] = seat.value;
+        seatArr[count] = seat.value;
         count++;
       }
     });
 
     let string = '';
-    for (let i = 0; i < arr.length; i++) {
-      string += arr[i] + ' ';
+    for (let i = 0; i < seatArr.length; i++) {
+      string += seatArr[i] + ' ';
     }
     alert(document.querySelector('#seats').value + '개 좌석 예약, 좌석번호 : ' + string);
+
+    let showId = $('#showId').val()
+    console.log('showId = ' + showId)
+
+    $.ajax({
+      type: "POST",
+      url: '/seats/' + showId,
+      contentType: 'application/json',
+      data: JSON.stringify({
+        seats: string
+      }),
+
+      success: function (response) {
+        console.log(response)
+        alert('예약성공');
+        window.location.href = '/main'
+      },
+
+      error: function (response) {
+        alert('예약실패')
+        console.log(response)
+      },
+    })
   });
+
 </script>
 </body>
 </html>

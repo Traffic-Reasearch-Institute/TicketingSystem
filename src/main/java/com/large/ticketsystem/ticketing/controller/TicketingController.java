@@ -26,7 +26,6 @@ public class TicketingController {
     public String getSeats(@PathVariable Long showId, Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         model.addAttribute("seats", ticketingService.getSeats(showId, userDetails.getMember().getId()));
         return "seats";
-//        return ticketingService.getSeats(showId);
     }
 
     @PostMapping("/seats/{showId}")
@@ -37,5 +36,4 @@ public class TicketingController {
         ticketingService.reservationSeats(seats, showId, userDetails.getMember().getId());
         return new ResponseEntity<>("예약 성공", HttpStatus.CREATED);
     }
-
 }

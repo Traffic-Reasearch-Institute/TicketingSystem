@@ -1,7 +1,9 @@
 package com.large.ticketsystem.ticketing.service;
 
 import com.large.ticketsystem.members.repository.MembersRepository;
+import com.large.ticketsystem.members.repository.ShowRepository;
 import com.large.ticketsystem.reservation.model.Reservation;
+import com.large.ticketsystem.reservation.model.Show;
 import com.large.ticketsystem.reservation.repository.ReservationRepository;
 import com.large.ticketsystem.ticketing.model.ReservedSeats;
 import com.large.ticketsystem.ticketing.model.Seats;
@@ -25,8 +27,15 @@ public class TicketingService {
     private final ReservationRepository reservationRepository;
     private final MembersRepository membersRepository;
 
+    private final ShowRepository showRepository; //todo 없애기
+
     @PostConstruct //todo 없애기
     public void init() {
+
+        Show show1 = new Show("공연1");
+        Show show2 = new Show("공연2");
+        showRepository.save(show1);
+        showRepository.save(show2);
 
         for (int i = 1; i <= 30; i++) {
             Seats seat = new Seats(1L, "A" + i);
@@ -91,8 +100,14 @@ public class TicketingService {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
+
+
         //예약내역을 예약 테이블에 먼저 저장 //todo 수정할 것
-        Reservation reservation = new Reservation(showId, memberId);
+        Show show = showRepository.findById(showId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 공연입니다") //todo 커스텀 예외로 바꿔주기(TicketingException)
+        );
+
+        Reservation reservation = new Reservation(show, memberId);
         Reservation savedReservation = reservationRepository.save(reservation);
 
 

@@ -18,6 +18,36 @@
 </head>
 <script>
 
+    function ticketing(showId) {
+        $.ajax({
+            type: "GET",
+            url: "/seats/" + showId,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Content-type","application/json");
+                xhr.setRequestHeader("Authorization", getCookie('Authorization'));
+            },
+            success: function (res) {
+                document.location='/seats/'+showId
+                console.log(res);
+            }
+        });
+    }
+
+    function getCookie(cName) {
+        cName = cName + '=';
+        var cookieData = document.cookie;
+        var start = cookieData.indexOf(cName);
+        var cValue = '';
+        if(start != -1){
+            start += cName.length;
+            var end = cookieData.indexOf(';', start);
+            if(end == -1)end = cookieData.length;
+            cValue = cookieData.substring(start, end);
+        }
+        return unescape(cValue);
+    }
+
+
 </script>
 <style>
     @font-face {
@@ -130,6 +160,16 @@
         </div>
     </div>
 
+     <div class="contents-wrapper">
+        <div class="contnets">
+            <button id="show1" onclick="ticketing(1)"> 공연1 </button>
+        </div>
+    </div>
+     <div class="contents-wrapper">
+        <div class="contnets" >
+            <button id="show2" onclick="ticketing(2)"> 공연2 </button>
+        </div>
+    </div>
 </div>
 
 

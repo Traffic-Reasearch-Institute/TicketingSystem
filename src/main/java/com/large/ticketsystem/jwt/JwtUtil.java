@@ -33,7 +33,7 @@ public class JwtUtil {
     private static final String BEARER_PREFIX = "Bearer ";
 
     //토큰 유효시간 설정
-    private static final long TOKEN_TIME = Long.MAX_VALUE;
+    private static final long TOKEN_TIME = 960 * 60 * 1000L;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -104,6 +104,7 @@ public class JwtUtil {
     // 인증 객체 생성
     public Authentication createAuthentication(String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        log.info("userDetails = {}", userDetails.getUsername());
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 

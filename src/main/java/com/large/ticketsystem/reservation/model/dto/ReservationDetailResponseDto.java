@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class ReservationResponseDto {
+public class ReservationDetailResponseDto {
 
     private Long reservationId;
     private String showTitle;
@@ -17,4 +17,6 @@ public class ReservationResponseDto {
     @CreatedDate
     private LocalDateTime createdAt;
     private boolean status;
+
+    private List<String> seats;
 }

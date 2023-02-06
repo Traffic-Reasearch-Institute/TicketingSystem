@@ -8,7 +8,5 @@ import java.util.List;
 public interface CustomSeatsRepository {
     List<String> findByReservationId(Long reservationId);
 
-    List<SeatsResponseDto> findByShowId(Long showId);
-
     void updateStatus(List<Long> seats);
 }

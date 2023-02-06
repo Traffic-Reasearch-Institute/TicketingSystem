@@ -1,6 +1,9 @@
 package com.large.ticketsystem.ticketing.service;
 
+import com.large.ticketsystem.members.repository.MembersRepository;
+import com.large.ticketsystem.members.repository.ShowRepository;
 import com.large.ticketsystem.reservation.model.Reservation;
+import com.large.ticketsystem.reservation.model.Show;
 import com.large.ticketsystem.reservation.repository.ReservationRepository;
 import com.large.ticketsystem.ticketing.model.ReservedSeats;
 import com.large.ticketsystem.ticketing.model.Seats;
@@ -22,9 +25,17 @@ public class TicketingService {
     private final SeatsRepository seatsRepository;
     private final ReservedSeatsRepository seatReservationRepository;
     private final ReservationRepository reservationRepository;
+    private final MembersRepository membersRepository;
+
+    private final ShowRepository showRepository; //todo 없애기
 
     @PostConstruct //todo 없애기
     public void init() {
+
+        Show show1 = new Show("공연1");
+        Show show2 = new Show("공연2");
+        showRepository.save(show1);
+        showRepository.save(show2);
 
         for (int i = 1; i <= 30; i++) {
             Seats seat = new Seats(1L, "A" + i);
@@ -41,9 +52,13 @@ public class TicketingService {
 
     //좌석 정보 가져오기
     @Transactional(readOnly = true)
-    public List<SeatsResponseDto> getSeats(Long showId) {
+    public List<SeatsResponseDto> getSeats(Long showId, Long memberId) {
 
-//        //해당 공연의 좌석 리스트 가져오기
+        membersRepository.findById(memberId).orElseThrow(
+                () -> new IllegalArgumentException("로그인을 해주세요")
+        );
+
+        //해당 공연의 좌석 리스트 가져오기
         List<Seats> seats = seatsRepository.findAllByShowId(showId);
 
         //dto로 변환하고 좌석 id순서대로 정렬
@@ -54,15 +69,15 @@ public class TicketingService {
                         .build())
                 .sorted(Comparator.comparing(SeatsResponseDto::getSeatId))
                 .collect(Collectors.toList());
-
-//        return seatsRepository.findByShowId(showId);
     }
 
     // 좌석 예매하기
     @Transactional
-    public void reservationSeats(String seats, Long showId) {
-        //todo memberId 가져오기
-        Long memberId = 5L;
+    public void reservationSeats(String seats, Long showId, Long memberId) {
+
+        membersRepository.findById(memberId).orElseThrow(
+                () -> new IllegalArgumentException("로그인을 해주세요")
+        );
 
         //좌석번호가 "seats" : "5 6 7" -> 이런 식으로 들어오기 때문에 쪼개서 5,6,7을 List<Long> 안에 담아주도록 한다
         String[] split = seats.split(":\"")[1].split(" ");
@@ -85,8 +100,14 @@ public class TicketingService {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
+
+
         //예약내역을 예약 테이블에 먼저 저장 //todo 수정할 것
-        Reservation reservation = new Reservation(showId, memberId);
+        Show show = showRepository.findById(showId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 공연입니다") //todo 커스텀 예외로 바꿔주기(TicketingException)
+        );
+
+        Reservation reservation = new Reservation(show, memberId);
         Reservation savedReservation = reservationRepository.save(reservation);
 
 

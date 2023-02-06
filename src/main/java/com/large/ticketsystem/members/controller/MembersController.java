@@ -1,9 +1,7 @@
 package com.large.ticketsystem.members.controller;
 
-import com.large.ticketsystem.members.dto.MemberCachedDto;
 import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
-import com.large.ticketsystem.members.entity.Members;
 import com.large.ticketsystem.members.service.MembersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +26,4 @@ public class MembersController {
         return membersService.login(membersRequestDto, response);
     }
 
-    @GetMapping("/{memberId}")
-    public MemberCachedDto getMembers(@PathVariable(name = "memberId") Long memberid) {
-        return membersService.findOneById(memberid);
-    }
 }

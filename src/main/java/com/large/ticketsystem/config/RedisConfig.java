@@ -1,5 +1,11 @@
 package com.large.ticketsystem.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.large.ticketsystem.redis.CacheKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -12,6 +18,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -49,14 +56,18 @@ public class RedisConfig {
     //RedisCacheManager를 Bean으로 등록하면 기본 CacheManager를 RedisCacheManager로 사용함.
     @Bean(name = "cacheManager")
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        //cache 사용을 위해 redisCacheConfiguration 초기화
         RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
                 // null value 캐시안함
                 .disableCachingNullValues()
-                // 캐시의 기본 유효시간 설정
+                // 캐시의 기본 유효시간 설정 -> CacheKey의 DEFAULT_EXPIRE_SEC로 설정
                 .entryTtl(Duration.ofSeconds(CacheKey.DEFAULT_EXPIRE_SEC))
+                //키 앞에 붙는 prefix 형식 지정. 여기서는 '이름::' 이렇게 되도록 설정되어 있음
                 .computePrefixWith(CacheKeyPrefix.simple())
                 // redis 캐시 데이터 저장방식을 StringSeriallizer로 지정
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
+                //value 직렬화 기본 옵션이 jdk 직렬화라 이상하게 나옴. 사람이 읽을 수 있게 json으로
+//                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
         // 캐시키별 유효시간 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
@@ -65,6 +76,5 @@ public class RedisConfig {
 
         return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(connectionFactory).cacheDefaults(configuration)
                 .withInitialCacheConfigurations(cacheConfigurations).build();
-
     }
 }

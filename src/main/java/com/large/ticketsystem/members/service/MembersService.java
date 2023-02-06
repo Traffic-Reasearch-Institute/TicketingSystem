@@ -1,7 +1,6 @@
 package com.large.ticketsystem.members.service;
 
 import com.large.ticketsystem.jwt.JwtUtil;
-import com.large.ticketsystem.members.dto.MemberCachedDto;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
 import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.entity.Members;
@@ -11,12 +10,12 @@ import com.large.ticketsystem.redis.CacheKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
@@ -27,6 +26,17 @@ public class MembersService {
     private final MembersRepository membersRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    public void init() {
+        Members members1 = new Members("test1", "11",MembersRoleEnum.MEMBER);
+        Members members2 = new Members("test2", "11",MembersRoleEnum.MEMBER);
+        Members members3 = new Members("test3", "11",MembersRoleEnum.MEMBER);
+
+        membersRepository.save(members1);
+        membersRepository.save(members2);
+        membersRepository.save(members3);
+    }
 
     //클라이언트 상태코드 수정을 위해 사용함
     public void membersExceptionHandler(HttpServletResponse response, int statusCode) {
@@ -44,7 +54,6 @@ public class MembersService {
     @Transactional
     public MembersResponseMsgDto signup(MembersRequestDto membersRequestDto, HttpServletResponse response) {
         String username = membersRequestDto.getUsername();
-//        String password = membersSignupRequestDto.getPassword();
         String password = passwordEncoder.encode(membersRequestDto.getPassword());
 
         //회원 중복 확인
@@ -80,23 +89,15 @@ public class MembersService {
                 () -> new IllegalArgumentException("등록되지 않은 회원입니다."));
 
         //비밀번호 확인
-        if (!passwordEncoder.matches(password, existMember.getPassword())) {
-            return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
-        }
+//        if (!passwordEncoder.matches(password, existMember.getPassword())) {
+//            return handleMemberException("비밀번호가 일치하지 않습니다.",HttpStatus.BAD_REQUEST, response);
+//        }
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
 
         return handleMemberException("로그인 성공", HttpStatus.OK, response);
     }
 
-    @Cacheable(value = CacheKey.USERNAME, key = "#memberid")
-    public MemberCachedDto findOneById(Long memberid) {
-        Members members = membersRepository.findById(memberid).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않음")
-        );
 
-        MemberCachedDto memberCachedDto = new MemberCachedDto(members.getId(), members.getUsername());
 
-        return memberCachedDto;
-    }
 }

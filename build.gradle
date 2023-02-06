@@ -40,6 +40,21 @@ dependencies {
 
     //springSecurity
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    //spring data redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //테스트 환경에서 사용하기 위한 embedded redis
+    implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
+
+    //JUnit4 추가
+    testImplementation("org.junit.vintage:junit-vintage-engine") {
+        exclude group: "org.hamcrest", module: "hamcrest-core"
+    }
+
+    //테스트 코드에서 롬복 가능하게
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {

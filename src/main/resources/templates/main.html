@@ -17,6 +17,16 @@
     <title>ticketingSystem | main</title>
 </head>
 <script>
+    function logout(check) {
+        // 토큰 값 ''으로 덮어쓰기
+        document.cookie =
+            'Authorization' + '=' + '' + ';path=/';
+
+        window.location.href = '/login'
+        // if(check) {
+        //     window.location.reload();
+        // }
+    }
 
     function ticketing(showId) {
         $.ajax({
@@ -146,6 +156,7 @@
         <a>header navBar-1</a>
         <a>header navBar-2</a>
         <a>header navBar-3</a>
+        <a onclick="logout()">logout</a>
     </div>
 </header>
 <hr>

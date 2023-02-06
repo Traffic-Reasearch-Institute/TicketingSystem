@@ -1,14 +1,13 @@
 package com.large.ticketsystem.members.controller;
 
+import com.large.ticketsystem.members.dto.MemberCachedDto;
 import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
+import com.large.ticketsystem.members.entity.Members;
 import com.large.ticketsystem.members.service.MembersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,7 +24,12 @@ public class MembersController {
     }
 
     @PostMapping("/login")
-    public MembersResponseMsgDto login(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response){
+    public MembersResponseMsgDto login(@RequestBody MembersRequestDto membersRequestDto, HttpServletResponse response) {
         return membersService.login(membersRequestDto, response);
+    }
+
+    @GetMapping("/{memberId}")
+    public MemberCachedDto getMembers(@PathVariable(name = "memberId") Long memberid) {
+        return membersService.findOneById(memberid);
     }
 }

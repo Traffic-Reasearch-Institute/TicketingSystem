@@ -1,13 +1,17 @@
 package com.large.ticketsystem.members.service;
 
 import com.large.ticketsystem.jwt.JwtUtil;
+import com.large.ticketsystem.members.dto.MemberCachedDto;
 import com.large.ticketsystem.members.dto.MembersResponseMsgDto;
 import com.large.ticketsystem.members.dto.MembersRequestDto;
 import com.large.ticketsystem.members.entity.Members;
 import com.large.ticketsystem.members.entity.MembersRoleEnum;
 import com.large.ticketsystem.members.repository.MembersRepository;
+import com.large.ticketsystem.redis.CacheKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,5 +87,16 @@ public class MembersService {
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(existMember.getUsername(),existMember.getRole()));
 
         return handleMemberException("로그인 성공", HttpStatus.OK, response);
+    }
+
+    @Cacheable(value = CacheKey.USERNAME, key = "#memberid")
+    public MemberCachedDto findOneById(Long memberid) {
+        Members members = membersRepository.findById(memberid).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않음")
+        );
+
+        MemberCachedDto memberCachedDto = new MemberCachedDto(members.getId(), members.getUsername());
+
+        return memberCachedDto;
     }
 }

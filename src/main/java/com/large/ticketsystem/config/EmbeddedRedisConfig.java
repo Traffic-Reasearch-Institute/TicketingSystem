@@ -10,25 +10,27 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 
+//embedded redis는 profile이 local일 때에만 작동
+//application.properties에서 spring.profiles.active=local로 설정해 두었음
 @Slf4j
-//이 config 클래스가 로컬에서만 적용되도록 지정
 @Profile("local")
 @Configuration
-public class LocalRedisConfig {
+public class EmbeddedRedisConfig {
 
     //application.properties에서 포트 값 가져와서 redisPort에 저장
     @Value("${spring.redis.port}")
     private int redisPort;
+
     private RedisServer redisServer;
 
-    //객체가 생성될 때 실행되는 메서드
+    //객체가 생성될 때 실행됨
     @PostConstruct
     public void redisServer() throws IOException {
         redisServer = new RedisServer(redisPort);
         redisServer.start();
     }
 
-    //객체가 삭제될 때 실행되는 메서드
+    //객체가 삭제될 때 실행됨
     @PreDestroy
     public void stopRedis() {
         if (redisServer != null) {

@@ -1,5 +1,6 @@
 package com.large.ticketsystem.ticketing.service;
 
+import com.large.ticketsystem.members.repository.MembersRepository;
 import com.large.ticketsystem.reservation.model.Reservation;
 import com.large.ticketsystem.reservation.repository.ReservationRepository;
 import com.large.ticketsystem.ticketing.model.ReservedSeats;
@@ -22,6 +23,7 @@ public class TicketingService {
     private final SeatsRepository seatsRepository;
     private final ReservedSeatsRepository seatReservationRepository;
     private final ReservationRepository reservationRepository;
+    private final MembersRepository membersRepository;
 
     @PostConstruct //todo 없애기
     public void init() {
@@ -41,9 +43,13 @@ public class TicketingService {
 
     //좌석 정보 가져오기
     @Transactional(readOnly = true)
-    public List<SeatsResponseDto> getSeats(Long showId) {
+    public List<SeatsResponseDto> getSeats(Long showId, Long memberId) {
 
-//        //해당 공연의 좌석 리스트 가져오기
+        membersRepository.findById(memberId).orElseThrow(
+                () -> new IllegalArgumentException("로그인을 해주세요")
+        );
+
+        //해당 공연의 좌석 리스트 가져오기
         List<Seats> seats = seatsRepository.findAllByShowId(showId);
 
         //dto로 변환하고 좌석 id순서대로 정렬
@@ -54,15 +60,15 @@ public class TicketingService {
                         .build())
                 .sorted(Comparator.comparing(SeatsResponseDto::getSeatId))
                 .collect(Collectors.toList());
-
-//        return seatsRepository.findByShowId(showId);
     }
 
     // 좌석 예매하기
     @Transactional
-    public void reservationSeats(String seats, Long showId) {
-        //todo memberId 가져오기
-        Long memberId = 5L;
+    public void reservationSeats(String seats, Long showId, Long memberId) {
+
+        membersRepository.findById(memberId).orElseThrow(
+                () -> new IllegalArgumentException("로그인을 해주세요")
+        );
 
         //좌석번호가 "seats" : "5 6 7" -> 이런 식으로 들어오기 때문에 쪼개서 5,6,7을 List<Long> 안에 담아주도록 한다
         String[] split = seats.split(":\"")[1].split(" ");

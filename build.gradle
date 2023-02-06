@@ -38,6 +38,12 @@ dependencies {
 
     //springSecurity
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    //spring data redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //테스트 환경에서 사용하기 위한 embedded redis
+    implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.1'
 }
 
 tasks.named('test') {

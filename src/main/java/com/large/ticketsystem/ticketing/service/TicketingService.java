@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,12 +28,12 @@ public class TicketingService {
     @PostConstruct //todo 없애기
     public void init() {
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 1; i <= 30; i++) {
             Seats seat = new Seats(1L, "A" + i);
             seatsRepository.save(seat);
         }
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 1; i <= 30; i++) {
             Seats seat = new Seats(2L, "B" + i);
             seatsRepository.save(seat);
         }
@@ -44,16 +45,19 @@ public class TicketingService {
     @Transactional(readOnly = true)
     public List<SeatsResponseDto> getSeats(Long showId) {
 
-        //해당 공연의 좌석 리스트 가져오기
+//        //해당 공연의 좌석 리스트 가져오기
         List<Seats> seats = seatsRepository.findAllByShowId(showId);
 
         //dto로 변환하고 좌석 id순서대로 정렬
         return seats.stream().map(seat -> SeatsResponseDto.builder()
                         .seatId(seat.getSeatId())
                         .seatNum(seat.getSeatNum())
+                        .status(seat.isStatus())
                         .build())
                 .sorted(Comparator.comparing(SeatsResponseDto::getSeatId))
                 .collect(Collectors.toList());
+
+//        return seatsRepository.findByShowId(showId);
     }
 
     // 좌석 예매하기
@@ -74,7 +78,7 @@ public class TicketingService {
             throw new IllegalArgumentException("존재하지 않는 좌석입니다"); //todo 커스텀 예외로 바꿔주기(TicketingException)
         }
 
-        //예약내역 먼저 저장 //todo 수정할 것
+        //예약 테이블에 먼저 저장 //todo 수정할 것
         Reservation reservation = new Reservation(showId, memberId);
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -85,7 +89,8 @@ public class TicketingService {
             seatReservationRepository.save(reservedSeat);
         }
 
-        //todo showId, memberId 가지고 예약 엔티티에 저장
+        // 좌석정보에 status -> true(예약됨) 으로 바꿔주기
+        seatsRepository.updateStatus(seats);
     }
 
 }

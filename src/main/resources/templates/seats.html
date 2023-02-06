@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
   <script src="http://code.jquery.com/jquery-latest.js"></script>
@@ -68,6 +68,13 @@
     }
 
   </style>
+
+  <script>
+    $(document).ready(function () {
+
+    });
+  </script>
+
   <title></title>
 </head>
 <body>
@@ -83,34 +90,38 @@
   <div class="container" id="container">
     <h2>Seat Reservation</h2>
     <p>예약가능 좌석 : 하늘색</p>
-    <div class="row">
-      <button class="seat sold" id="seat1" value="1">1</button>
-      <button class="seat sold" id="seat2" value="2">2</button>
-      <button class="seat selling" id="seat3" value="3">3</button>
-      <button class="seat selling" id="seat4" value="4">4</button>
-      <button class="seat selling" id="seat5" value="5">5</button>
-      <button class="seat selling" id="seat6" value="6">6</button>
-      <button class="seat sold" id="seat7" value="7">7</button>
-      <button class="seat selling" id="seat8" value="8">8</button>
-      <button class="seat sold" id="seat9" value="9">9</button>
-      <button class="seat selling" id="seat10" value="10">10</button>
-      <!-- Add more seats here -->
-    </div>
+<!--    <div class="row">-->
+<!--      <button class="seat sold" id="seat1" value="1">1</button>-->
+<!--      <button class="seat sold" id="seat2" value="2">2</button>-->
+<!--      <button class="seat selling" id="seat3" value="3">3</button>-->
+<!--      <button class="seat selling" id="seat4" value="4">4</button>-->
+<!--      <button class="seat selling" id="seat5" value="5">5</button>-->
+<!--      <button class="seat selling" id="seat6" value="6">6</button>-->
+<!--      <button class="seat sold" id="seat7" value="7">7</button>-->
+<!--      <button class="seat selling" id="seat8" value="8">8</button>-->
+<!--      <button class="seat sold" id="seat9" value="9">9</button>-->
+<!--      <button class="seat selling" id="seat10" value="10">10</button>-->
+<!--      &lt;!&ndash; Add more seats here &ndash;&gt;-->
+<!--    </div>-->
+
+<!--    <div class="row">-->
+<!--      <button class="seat sold" id="seat11" value="11">11</button>-->
+<!--      <button class="seat selling" id="seat12" value="12">12</button>-->
+<!--      <button class="seat selling" id="seat13" value="13">13</button>-->
+<!--      <button class="seat selling" id="seat14" value="14">14</button>-->
+<!--      <button class="seat sold" id="seat20" value="15">15</button>-->
+<!--      <button class="seat sold" id="seat15" value="16">16</button>-->
+<!--      <button class="seat sold" id="seat16" value="17">17</button>-->
+<!--      <button class="seat selling" id="seat17" value="18">18</button>-->
+<!--      <button class="seat selling" id="seat18" value="19">19</button>-->
+<!--      <button class="seat selling" id="seat19" value="20">20</button>-->
+<!--    </div>-->
 
     <div class="row">
-      <button class="seat sold" id="seat11" value="11">11</button>
-      <button class="seat selling" id="seat12" value="12">12</button>
-      <button class="seat selling" id="seat13" value="13">13</button>
-      <button class="seat selling" id="seat14" value="14">14</button>
-      <button class="seat sold" id="seat20" value="15">15</button>
-      <button class="seat sold" id="seat15" value="16">16</button>
-      <button class="seat sold" id="seat16" value="17">17</button>
-      <button class="seat selling" id="seat17" value="18">18</button>
-      <button class="seat selling" id="seat18" value="19">19</button>
-      <button class="seat selling" id="seat19" value="20">20</button>
-    </div>
-
-    <div class="row">
+      <th:block th:each="seat : ${seats}">
+        <button th:if="${seat.status} == false" class="seat selling" th:value="${seat.seatId}" th:text="${seat.seatNum}"></button>
+        <button th:if="${seat.status} == true"  class="seat sold" th:value="${seat.seatId}" th:text="${seat.seatNum}"></button>
+      </th:block>
     </div>
 
     <!-- Dropdown box to select seat -->
